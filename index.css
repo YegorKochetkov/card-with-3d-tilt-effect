@@ -141,8 +141,8 @@ body {
 		transition-property: opacity, transform;
 	}
 
-	&[data-title],
-	&[data-subtitle] {
+	&.card-info-title,
+	&.card-info-subtitle {
 		font-size: min(3cqw, 2.4rem);
 		font-weight: 800;
 		letter-spacing: 0.2cqw;
@@ -150,13 +150,13 @@ body {
 		text-transform: uppercase;
 	}
 
-	&[data-subtitle] {
+	&.card-info-subtitle {
 		margin-left: 2cqw;
 		font-size: min(2.2cqw, 1.8rem);
 		font-weight: 600;
 	}
 
-	&[data-description] {
+	&.card-info-description {
 		margin-left: 1cqw;
 		font-size: min(1.5cqw, 0.95rem);
 		font-family: var(--font-archivo);

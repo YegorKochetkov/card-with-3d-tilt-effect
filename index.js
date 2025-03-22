@@ -37,7 +37,7 @@
  * @param {number} t - Interpolation factor (0-1)
  * @returns {number} Interpolated value
  */
-const lerp = (a, b, t) => a + (b - a) * t;
+const interpolate = (a, b, t) => a + (b - a) * t;
 
 /**
  * Generates unique incremental IDs
@@ -49,98 +49,97 @@ const genId = (() => {
 })();
 
 /**
- * Manages RequestAnimationFrame callbacks
+ * Creates a RequestAnimationFrame manager
+ * @returns {Object} Raf instance with methods to manage animation frames
  */
-class Raf {
-	constructor() {
-		this.rafId = 0;
-		this.raf = this.raf.bind(this);
-		this.callbacks = [];
-
-		this.start();
-	}
-
-	/**
-	 * Starts the animation frame loop
-	 */
-	start() {
-		this.raf();
-	}
-
-	/**
-	 * Stops the animation frame loop
-	 */
-	stop() {
-		cancelAnimationFrame(this.rafId);
-	}
+const createRaf = () => {
+	let rafId = 0;
+	let callbacks = [];
 
 	/**
 	 * Runs animation frame callbacks
 	 */
-	raf() {
-		this.callbacks.forEach(({ callback, id }) => callback({ id }));
-		this.rafId = requestAnimationFrame(this.raf);
-	}
+	const raf = () => {
+		callbacks.forEach(({ callback, id }) => callback({ id }));
+		rafId = requestAnimationFrame(raf);
+	};
+
+	/**
+	 * Starts the animation frame loop
+	 */
+	const start = () => {
+		raf();
+	};
+
+	/**
+	 * Stops the animation frame loop
+	 */
+	const stop = () => {
+		cancelAnimationFrame(rafId);
+	};
 
 	/**
 	 * Adds a callback to the animation frame loop
 	 * @param {function} callback - Function to call on each frame
 	 * @param {string} [id] - Optional unique identifier
 	 */
-	add(callback, id) {
-		this.callbacks.push({ callback, id: id || genId() });
-	}
+	const add = (callback, id) => {
+		callbacks.push({ callback, id: id || genId() });
+	};
 
 	/**
 	 * Removes a callback from the animation frame loop
 	 * @param {string} id - Identifier of the callback to remove
 	 */
-	remove(id) {
-		this.callbacks = this.callbacks.filter((callback) => callback.id !== id);
-	}
-}
+	const remove = (id) => {
+		callbacks = callbacks.filter((callback) => callback.id !== id);
+	};
+
+	start();
+
+	return { add, remove, stop };
+};
 
 /**
- * 2D Vector utility class
+ * Creates a 2D Vector
+ * @param {number} [x=0] - X coordinate
+ * @param {number} [y=0] - Y coordinate
+ * @returns {Object} Vec2 object with methods
  */
-class Vec2 {
-	/**
-	 * @param {number} [x=0] - X coordinate
-	 * @param {number} [y=0] - Y coordinate
-	 */
-	constructor(x = 0, y = 0) {
-		this.x = x;
-		this.y = y;
-	}
+const createVec2 = (x = 0, y = 0) => {
+	let state = { x, y };
 
 	/**
 	 * Sets vector coordinates
-	 * @param {number} x - X coordinate
-	 * @param {number} y - Y coordinate
+	 * @param {number} newX - X coordinate
+	 * @param {number} newY - Y coordinate
 	 */
-	set(x, y) {
-		this.x = x;
-		this.y = y;
-	}
+	const set = (newX, newY) => {
+		state.x = newX;
+		state.y = newY;
+	};
 
 	/**
 	 * Linear interpolation between current and target vector
-	 * @param {Vec2} v - Target vector
+	 * @param {Object} v - Target vector
 	 * @param {number} t - Interpolation factor
 	 */
-	lerp(v, t) {
-		this.x = lerp(this.x, v.x, t);
-		this.y = lerp(this.y, v.y, t);
-	}
-}
+	const interpolateVec = (v, t) => {
+		state.x = interpolate(state.x, v.x, t);
+		state.y = interpolate(state.y, v.y, t);
+	};
 
-/**
- * Creates a new Vec2 instance
- * @param {number} [x=0] - X coordinate
- * @param {number} [y=0] - Y coordinate
- * @returns {Vec2} New Vec2 instance
- */
-const vec2 = (x = 0, y = 0) => new Vec2(x, y);
+	return {
+		get x() {
+			return state.x;
+		},
+		get y() {
+			return state.y;
+		},
+		set,
+		interpolate: interpolateVec,
+	};
+};
 
 /**
  * Adds tilt effect to an element
@@ -153,8 +152,14 @@ export function tilt(node, options) {
 
 	let lerpAmount = 0.06;
 
-	const rotDeg = { current: vec2(), target: vec2() };
-	const bgPos = { current: vec2(), target: vec2() };
+	const rotDeg = {
+		current: createVec2(),
+		target: createVec2(),
+	};
+	const bgPos = {
+		current: createVec2(),
+		target: createVec2(),
+	};
 
 	/**
 	 * Updates tilt effect options
@@ -175,8 +180,8 @@ export function tilt(node, options) {
 	function ticker({ id }) {
 		rafId = id;
 
-		rotDeg.current.lerp(rotDeg.target, lerpAmount);
-		bgPos.current.lerp(bgPos.target, lerpAmount);
+		rotDeg.current.interpolate(rotDeg.target, lerpAmount);
+		bgPos.current.interpolate(bgPos.target, lerpAmount);
 
 		for (const el of target) {
 			el.style.setProperty("--rotX", rotDeg.current.y.toFixed(2) + "deg");
@@ -216,17 +221,21 @@ export function tilt(node, options) {
 	/**
 	 * Adds event listeners for tilt effect
 	 */
+	const mouseMoveAbortController = new AbortController();
 	const addListeners = () => {
-		trigger.addEventListener("mousemove", onMouseMove);
-		trigger.addEventListener("mouseleave", onMouseLeave);
+		trigger.addEventListener("mousemove", onMouseMove, mouseMoveAbortController);
+		trigger.addEventListener(
+			"mouseleave",
+			onMouseLeave,
+			mouseMoveAbortController
+		);
 	};
 
 	/**
 	 * Removes event listeners
 	 */
 	const removeListeners = () => {
-		trigger.removeEventListener("mousemove", onMouseMove);
-		trigger.removeEventListener("mouseleave", onMouseLeave);
+		mouseMoveAbortController.abort();
 	};
 
 	/**
@@ -267,10 +276,8 @@ function resolveOptions(node, options) {
 	};
 }
 
-// -----------------------------------------------------
-
 // Global Raf Instance
-const raf = new Raf();
+const raf = createRaf();
 
 /**
  * Initializes tilt effect for all background wrappers
