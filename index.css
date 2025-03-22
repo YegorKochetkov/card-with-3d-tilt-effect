@@ -131,7 +131,7 @@ body {
 
 .card-info-text {
 	font-family: var(--font-clash-display);
-	color: #fff;
+	color: #411818;
 	overflow: hidden;
 
 	& span {
