@@ -2,40 +2,30 @@
 
 @import url("https://api.fontshare.com/v2/css?f[]=archivo@100,200,300,400,500,600,700,800,900&f[]=clash-display@200,300,400,500,600,700&display=swap");
 
-	/* ------------ PARALLAX CARD ---------------- */
-	.card {
-		--slide-width: 100%;
-		--slide-height: 100%;
-		--slide-aspect: 1 / 1;
+/* ------------ PARALLAX CARD ---------------- */
+.parallax-card {
+	--slide-width: 100%;
+	--slide-height: 100%;
+	--slide-aspect: 1 / 1;
 
-		--slide-transition-duration: 800ms;
-		--slide-transition-easing: ease;
+	--slide-transition-duration: 800ms;
+	--slide-transition-easing: ease;
 
-		position: relative;
+	position: relative;
+	transition: transform var(--slide-transition-duration)
+		var(--slide-transition-easing);
+
+	&:hover {
+		transform: scale(0.98);
 		transition: transform var(--slide-transition-duration)
 			var(--slide-transition-easing);
-
-		&:hover {
-			transform: scale(0.98);
-			transition: transform var(--slide-transition-duration)
-				var(--slide-transition-easing);
-		}
 	}
-	.card.reset-position {
-		& .background-inner-wrapper {
-			transition: transform var(--slide-transition-duration)
-				var(--slide-transition-easing);
-		}
-		& .image {
-			transition: transform var(--slide-transition-duration)
-				var(--slide-transition-easing);
-		}
-		& .card-info-wrapper {
-			transition: transform var(--slide-transition-duration)
-				var(--slide-transition-easing);
-		}
 
-		& .card-info-inner-wrapper {
+	&.reset-position {
+		.background-inner-wrapper,
+		.image,
+		.card-info-wrapper,
+		.card-info-inner-wrapper {
 			transition: transform var(--slide-transition-duration)
 				var(--slide-transition-easing);
 		}
@@ -46,7 +36,6 @@
 	.background-wrapper {
 		--padding: 0px;
 		--offset: 0;
-		--slide-rotY: 0;
 
 		position: absolute;
 		pointer-events: auto;
@@ -57,9 +46,7 @@
 		user-select: none;
 		perspective: 800px;
 
-		transform: perspective(800px) rotateY(var(--slide-rotY));
-		transition: transform var(--slide-transition-duration)
-			var(--slide-transition-easing);
+		transform: perspective(800px);
 	}
 
 	.background-inner-wrapper {
@@ -99,7 +86,6 @@
 
 	.card-info-wrapper {
 		--padding: 0px;
-		--z-offset: 2400px;
 
 		position: relative;
 		width: var(--slide-width);
@@ -107,7 +93,6 @@
 		aspect-ratio: var(--slide-aspect);
 		perspective: 800px;
 		z-index: 100;
-		transform: translateX(var(--z-offset) / 2) translateY(var(--z-offset) / 2);
 	}
 
 	.card-info-inner-wrapper {
@@ -134,11 +119,11 @@
 			display: block;
 			white-space: nowrap;
 			transition: var(--slide-transition-duration) var(--slide-transition-easing);
-			transition-property: opacity, transform;
+			transition-property: transform;
 		}
 
-		& .card-info-title,
-		& .card-info-subtitle {
+		.card-info-title,
+		.card-info-subtitle {
 			font-size: min(5cqw, 4rem);
 			font-weight: 800;
 			letter-spacing: 0.2cqw;
@@ -146,13 +131,13 @@
 			text-transform: uppercase;
 		}
 
-		& .card-info-subtitle {
+		.card-info-subtitle {
 			margin-left: 2cqw;
 			font-size: min(2.2cqw, 2.8rem);
 			font-weight: 600;
 		}
 
-		& .card-info-description {
+		.card-info-description {
 			margin-left: 1cqw;
 			font-size: min(1.5cqw, 1.95rem);
 			font-weight: 300;

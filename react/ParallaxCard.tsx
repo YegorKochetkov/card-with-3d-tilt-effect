@@ -30,7 +30,7 @@ import React, { useRef } from "react";
  * and visually appealing.
  */
 const lerp = (a: number, b: number, t: number): number => a + (b - a) * t;
-let lerpFactor = 0.06;
+const lerpFactor = 0.06;
 
 interface Vec2 {
 	x: number;
@@ -121,18 +121,12 @@ export const ParallaxCard: React.FC = () => {
 	};
 
 	const onMouseMove = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		if (!cardRef.current) return;
+
 		cardRef.current?.classList.remove("reset-position");
 
-		lerpFactor = 0.1;
-
 		const { clientX, clientY } = event;
-		const { left, top, width, height } =
-			cardRef.current?.getBoundingClientRect() ?? {
-				left: 0,
-				top: 0,
-				width: 0,
-				height: 0,
-			};
+		const { left, top, width, height } = cardRef.current.getBoundingClientRect();
 
 		const x = clientX - left;
 		const y = clientY - top;
@@ -154,7 +148,6 @@ export const ParallaxCard: React.FC = () => {
 
 	const onMouseLeave = () => {
 		cardRef.current?.classList.add("reset-position");
-		lerpFactor = 0.06;
 
 		rotation.current.set(0, 0);
 		position.current.set(0, 0);
@@ -170,7 +163,7 @@ export const ParallaxCard: React.FC = () => {
 
 	return (
 		<article
-			className="card"
+			className="parallax-card"
 			onMouseLeave={onMouseLeave}
 			onMouseMove={onMouseMove}
 			ref={cardRef}
