@@ -1,5 +1,9 @@
 // Cut from slider https://codepen.io/dev_loop/pen/MWKbJmO
 import React, { useRef } from "react";
+import { TiLocationArrow } from "react-icons/ti";
+
+import { Button } from "./Button";
+import { cn } from "../../lib/utils";
 
 /**
  * Linear interpolation between two values:
@@ -79,7 +83,19 @@ const position = {
 	target: createVec2(),
 };
 
-export const ParallaxCard: React.FC = () => {
+export const ParallaxCard = ({
+	src,
+	title,
+	description,
+	isComingSoon,
+	decorativeElement,
+}: {
+	src?: string;
+	title?: string | React.ReactNode;
+	description?: string | React.ReactNode;
+	decorativeElement?: string | React.ReactNode;
+	isComingSoon?: boolean;
+}) => {
 	const cardRef = React.useRef<HTMLDivElement>(null);
 	const backgroundWrapperRef = useRef<HTMLDivElement>(null);
 	const textWrapperRef = React.useRef<HTMLDivElement>(null);
@@ -134,11 +150,14 @@ export const ParallaxCard: React.FC = () => {
 		const xPercentage = x / width;
 		const yPercentage = y / height;
 
-		const ox = (xPercentage - 0.5) * (Math.PI * 3);
-		const oy = -(yPercentage - 0.5) * (Math.PI * 6);
+		const rotationXFactor = width < 700 ? 2 : 1;
+		const rotationYFactor = height < 600 ? 4 : 2;
 
-		rotation.target.set(ox, oy);
-		position.target.set(-ox * 0.6, oy * 0.6);
+		const xRotation = (xPercentage - 0.5) * (Math.PI * rotationXFactor);
+		const yRotation = -(yPercentage - 0.5) * (Math.PI * rotationYFactor);
+
+		rotation.target.set(xRotation, yRotation);
+		position.target.set(-xRotation * 0.6, yRotation * 0.6);
 
 		rotation.current.interpolate(rotation.target, lerpFactor);
 		position.current.interpolate(position.target, lerpFactor);
@@ -163,7 +182,7 @@ export const ParallaxCard: React.FC = () => {
 
 	return (
 		<article
-			className="parallax-card"
+			className="parallax-card size-full hover:scale-[98%] hover:md:scale-[99%]"
 			onMouseLeave={onMouseLeave}
 			onMouseMove={onMouseMove}
 			ref={cardRef}
@@ -171,12 +190,8 @@ export const ParallaxCard: React.FC = () => {
 			{/* Card background */}
 			<div className="background-wrapper">
 				<div className="background-inner-wrapper" ref={backgroundWrapperRef}>
-					<div className="image-wrapper">
-						<img
-							className="image"
-							src="https://devloop01.github.io/voyage-slider/images/scotland-mountains.jpg"
-							alt="Scotland Mountains"
-						/>
+					<div className="video-wrapper rounded-lg overflow-hidden border border-white/20 bg-bbsu-violet-300">
+						<video src={src} autoPlay muted loop className="video" />
 					</div>
 				</div>
 			</div>
@@ -185,16 +200,23 @@ export const ParallaxCard: React.FC = () => {
 			<div className="card-info-wrapper">
 				<div className="card-info-inner-wrapper" ref={textWrapperRef}>
 					<div className="card-info-text-wrapper">
-						<h2 className="card-info-title">
-							<span>Highlands</span>
-						</h2>
-						<p className="card-info-subtitle">
-							<span>Scotland</span>
-						</p>
-						<p className="card-info-description">
-							<span>The mountains are calling</span>
-						</p>
+						<div>
+							<h2 className="card-info-title">
+								<span>{title}</span>
+							</h2>
+							<p className="card-info-description">{description}</p>
+						</div>
+						{isComingSoon ? (
+							<Button
+								type="button"
+								className={cn("button", "video-card-button")}
+								rightIcon={<TiLocationArrow />}
+							>
+								Coming soon
+							</Button>
+						) : null}
 					</div>
+					{decorativeElement}
 				</div>
 			</div>
 		</article>
